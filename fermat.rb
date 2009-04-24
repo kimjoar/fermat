@@ -7,7 +7,7 @@ require 'sinatra'
 require 'maruku'
 
 class Fermat
-  attr_accessor :posts_repo, :cache_path, :images_path, :posts_path, :posts_images_path, :posts_suffix, :cache_suffix
+  attr_accessor :posts_repo, :cache_path, :images_path, :posts_path, :posts_suffix, :cache_suffix
 
   def initialize
     @path = File.dirname(__FILE__)
