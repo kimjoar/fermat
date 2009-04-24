@@ -27,4 +27,4 @@ Default tree structure
     `-- post.erb
 </pre>
 
-All the files in the posts folder with suffix <pre>.markdown</pre> will be converted to HTML and cached in the cache folder.
+All the files in the posts folder with suffix `.markdown` will be converted to HTML and cached in the cache folder.
