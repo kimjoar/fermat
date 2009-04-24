@@ -1,7 +1,3 @@
-# Fermat
-# 
-# A simple Sinatra powered blog engine that parses Markdown formatted files
-
 require 'rubygems'
 require 'sinatra'
 require 'maruku'
