@@ -1,7 +1,7 @@
 Fermat
 ======
 
-A simple [Sinatra](http://www.sinatrarb.com/) powered blog engine that parses [Markdown](http://daringfireball.net/projects/markdown/) formatted files.
+A dead simple [Sinatra](http://www.sinatrarb.com/) powered blog engine that parses [Markdown](http://daringfireball.net/projects/markdown/) formatted files.
 
 Fermat was developed to power [Kimjoar.net](http://kimjoar.net).
 
