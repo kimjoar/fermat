@@ -28,3 +28,8 @@ Default tree structure
 </pre>
 
 All the files in the posts folder with suffix `.markdown` will be converted to HTML and cached in the cache folder.
+
+RSS
+---
+
+Fermat now also includes a simple RSS feed for entries. Remember to update the configuration before Fermat's RSS functionality.
