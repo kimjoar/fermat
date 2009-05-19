@@ -115,11 +115,11 @@ get '/rss.xml' do
 
         @posts.each do |post|
           xml.item do
-            xml.title post["heading"]
-            xml.link options.baseurl + "post/#{post["basename"]}"
-            xml.description post["text"]
-            xml.pubDate Time.parse(post["date"].to_s).rfc822()
-            xml.guid options.baseurl + "post/#{post["basename"]}"
+            xml.title post.heading
+            xml.link options.baseurl + "post/#{post.basename}"
+            xml.description post.text
+            xml.pubDate Time.parse(post.date.to_s).rfc822()
+            xml.guid options.baseurl + "post/#{post.basename}"
           end
         end
       end
