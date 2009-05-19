@@ -19,15 +19,16 @@ class Fermat
   def cache
     files = Dir.glob(@posts_path + "/*" + @posts_suffix)
     cached_posts = {}
+    
     files.each do |filename|
       post = parse_file(filename)
-      f = File.new(@cache_path + "/" + post["basename"] + @cache_suffix, "w")
+      f = File.new(@cache_path + "/" + post.basename + @cache_suffix, "w")
       f.flock(File::LOCK_EX)
-      f.write(post["text"])
+      f.write(post.text)
       f.flock(File::LOCK_UN)
       f.close
 
-      cached_posts[post["date"].join("").to_i] = post
+      cached_posts[post.date.join("").to_i] = post
     end
 
     f = File.new(@cache_path + "/posts.marshal", "w")
@@ -64,18 +65,22 @@ class Fermat
   def parse_file(filename)
     raise "File does not exist" if !File.file?(filename) 
 
-    post = {}
+    post = Post.new
     base = File.basename(filename, @posts_suffix).split("-", 4)
-    post["basename"] = base[3]
-    post["date"] = base[0..2]
+    post.basename = base[3]
+    post.date = base[0..2]
 
     File.open(filename) do |f|
-      post["heading"] = f.readline
+      post.heading = f.readline
       f.rewind
-      post["text"] = Maruku.new(f.read).to_html
+      post.text = Maruku.new(f.read).to_html
     end
 
     post
+  end
+  
+  class Post
+    attr_accessor :heading, :text, :basename, :date
   end
 end
 
