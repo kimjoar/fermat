@@ -19,14 +19,14 @@ class Fermat
   def post(name)
     raise "Name not valid" if name.include?("..")
     filename = @cache_path + "/" + name + @cache_suffix
-    raise "File does not exist" if !File.file?(filename) 
+    raise "File does not exist" unless File.file?(filename) 
     
     File.new(filename).read
   end
 
   def posts
     filename = @cache_path + "/posts.marshal"
-    raise "Posts cache does not exist" if !File.file?(filename)
+    raise "Posts cache does not exist" unless File.file?(filename)
 
     File.open(filename) do |f|
       @posts = Marshal.load(f.read())
@@ -38,7 +38,7 @@ class Fermat
   private
 
   def cache?
-    Dir.mkdir("cache") if !File.directory?("cache")
+    Dir.mkdir("cache") unless File.directory?("cache")
     Dir.glob(@posts_path + "/*" + @posts_suffix).length != Dir.glob(@cache_path + "/*" + @cache_suffix).length
   end
 
@@ -65,7 +65,7 @@ class Fermat
   end
 
   def parse_file(filename)
-    raise "File does not exist" if !File.file?(filename) 
+    raise "File does not exist" unless File.file?(filename) 
 
     post = Post.new
     base = File.basename(filename, @posts_suffix).split("-", 4)
