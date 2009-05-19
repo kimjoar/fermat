@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'sinatra'
 require 'maruku'
-require 'yaml'
 
 class Fermat
   attr_accessor :cache_path, :images_path, :posts_path, :posts_suffix, :cache_suffix
@@ -21,17 +20,16 @@ class Fermat
     files = Dir.glob(@posts_path + "/*" + @posts_suffix)
     cached_posts = {}
     files.each do |filename|
-      file = parse_file(filename)
-      f = File.new(@cache_path + "/" + file["basename"] + @cache_suffix, "w")
+      post = parse_file(filename)
+      f = File.new(@cache_path + "/" + post["basename"] + @cache_suffix, "w")
       f.flock(File::LOCK_EX)
-      f.write(file["text"])
+      f.write(post["text"])
       f.flock(File::LOCK_UN)
       f.close
 
-#      file.delete("text")
-      cached_posts[file["date"].join("").to_i] = file
+      cached_posts[post["date"].join("").to_i] = post
     end
-    
+
     f = File.new(@cache_path + "/posts.marshal", "w")
     f.flock(File::LOCK_EX)
     f.write(Marshal.dump(cached_posts.sort.reverse.map {|a| a[1]}))
@@ -66,24 +64,27 @@ class Fermat
   def parse_file(filename)
     raise "File does not exist" if !File.file?(filename) 
 
-    file = {}
+    post = {}
     base = File.basename(filename, @posts_suffix).split("-", 4)
-    file["basename"] = base[3]
-    file["date"] = base[0..2]
+    post["basename"] = base[3]
+    post["date"] = base[0..2]
 
     File.open(filename) do |f|
-      file["heading"] = f.readline
+      post["heading"] = f.readline
       f.rewind
-      file["text"] = Maruku.new(f.read).to_html
+      post["text"] = Maruku.new(f.read).to_html
     end
 
-    file
+    post
   end
 end
 
 configure do
   fermat = Fermat.new
   set :fermat, fermat
+  set :title, "Kim Joar Bekkelund"
+  set :baseurl, "http://kimjoar.net/"
+  set :description, "Kim Joar Bekkelund"
 end
 
 get '/' do
@@ -103,17 +104,17 @@ get '/rss.xml' do
     xml.instruct! :xml, :version => '1.0'
     xml.rss :version => "2.0" do
       xml.channel do
-        xml.title "Kim Joar Bekkelund"
-        xml.description "Kim Joar Bekkelund's personal blog."
-        xml.link "http://kimjoar.net/"
+        xml.title options.title
+        xml.description options.description
+        xml.link options.baseurl
 
         @posts.each do |post|
           xml.item do
             xml.title post["heading"]
-            xml.link "http://kimjoar.net/post/#{post["basename"]}"
+            xml.link options.baseurl + "post/#{post["basename"]}"
             xml.description post["text"]
             xml.pubDate Time.parse(post["date"].to_s).rfc822()
-            xml.guid "http://kimjoar.net/post/#{post["basename"]}"
+            xml.guid options.baseurl + "post/#{post["basename"]}"
           end
         end
       end
