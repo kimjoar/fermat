@@ -89,9 +89,6 @@ end
 configure do
   fermat = Fermat.new
   set :fermat, fermat
-  set :title, "Kim Joar Bekkelund"
-  set :baseurl, "http://kimjoar.net/"
-  set :description, "Kim Joar Bekkelund"
 end
 
 get '/' do
@@ -106,25 +103,5 @@ end
 
 get '/rss.xml' do
   @posts = options.fermat.posts
-  
-  builder do |xml|
-    xml.instruct! :xml, :version => '1.0'
-    xml.rss :version => "2.0" do
-      xml.channel do
-        xml.title options.title
-        xml.description options.description
-        xml.link options.baseurl
-
-        @posts.each do |post|
-          xml.item do
-            xml.title post.heading
-            xml.link options.baseurl + "post/#{post.basename}"
-            xml.description post.text
-            xml.pubDate Time.parse(post.date.to_s).rfc822()
-            xml.guid options.baseurl + "post/#{post.basename}"
-          end
-        end
-      end
-    end
-  end
+  builder :rss
 end
