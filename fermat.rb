@@ -6,10 +6,10 @@ class Fermat
   attr_accessor :cache_path, :images_path, :posts_path, :posts_suffix, :cache_suffix
 
   def initialize
-    @path = File.dirname(__FILE__)
-    @cache_path = @path + "/cache"
-    @images_path = @path + "/images"
-    @posts_path = @path + "/posts"
+    @path         = File.dirname(__FILE__)
+    @cache_path   = File.join(@path, "cache")
+    @images_path  = File.join(@path, "images")
+    @posts_path   = File.join(@path, "posts")
     @posts_suffix = ".markdown"
     @cache_suffix = ".html"
 
@@ -18,14 +18,14 @@ class Fermat
 
   def post(name)
     raise "Name not valid" if name.include?("..")
-    filename = @cache_path + "/" + name + @cache_suffix
+    filename = File.join(@cache_path, name + @cache_suffix)
     raise "File does not exist" unless File.file?(filename) 
     
     File.new(filename).read
   end
 
   def posts
-    filename = @cache_path + "/posts.marshal"
+    filename = File.join(@cache_path, "posts.marshal")
     raise "Posts cache does not exist" unless File.file?(filename)
 
     File.open(filename) do |f|
@@ -39,16 +39,16 @@ class Fermat
 
   def cache?
     Dir.mkdir("cache") unless File.directory?("cache")
-    Dir.glob(@posts_path + "/*" + @posts_suffix).length != Dir.glob(@cache_path + "/*" + @cache_suffix).length
+    Dir.glob(File.join(@posts_path, "*" + @posts_suffix)).length != Dir.glob(File.join(@cache_path, "*" + @cache_suffix)).length
   end
 
   def cache
-    files = Dir.glob(@posts_path + "/*" + @posts_suffix)
+    files = Dir.glob(File.join(@posts_path, "*" + @posts_suffix))
     cached_posts = {}
     
     files.each do |filename|
       post = parse_file(filename)
-      f = File.new(@cache_path + "/" + post.basename + @cache_suffix, "w")
+      f = File.new(File.join(@cache_path, post.basename + @cache_suffix), "w")
       f.flock(File::LOCK_EX)
       f.write(post.text)
       f.flock(File::LOCK_UN)
@@ -57,7 +57,7 @@ class Fermat
       cached_posts[post.date.join("").to_i] = post
     end
 
-    f = File.new(@cache_path + "/posts.marshal", "w")
+    f = File.new(File.join(@cache_path, "posts.marshal"), "w")
     f.flock(File::LOCK_EX)
     f.write(Marshal.dump(cached_posts.sort.reverse.map {|a| a[1]}))
     f.flock(File::LOCK_UN)
