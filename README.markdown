@@ -44,7 +44,6 @@ xml.rss :version => "2.0" do
     xml.link "http://kimjoar.net/"
 
     @posts.each do |post|
-      print post
       xml.item do
         xml.title post.heading
         xml.link "http://kimjoar.net/post/#{post.basename}"
