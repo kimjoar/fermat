@@ -48,9 +48,9 @@ class Fermat
     
     files.each do |filename|
       post = parse_file(filename)
-      f = File.new(File.join(@cache_path, post.basename + @cache_suffix), "w")
+      f = File.new(File.join(@cache_path, post.slug + @cache_suffix), "w")
       f.flock(File::LOCK_EX)
-      f.write(post.text)
+      f.write(post.body)
       f.flock(File::LOCK_UN)
       f.close
 
@@ -69,20 +69,20 @@ class Fermat
 
     post = Post.new
     base = File.basename(filename, @posts_suffix).split("-", 4)
-    post.basename = base[3]
+    post.slug = base[3]
     post.date = base[0..2]
 
     File.open(filename) do |f|
-      post.heading = f.readline
+      post.title = f.readline
       f.rewind
-      post.text = Maruku.new(f.read).to_html
+      post.body = Maruku.new(f.read).to_html
     end
 
     post
   end
 
   class Post
-    attr_accessor :heading, :text, :basename, :date
+    attr_accessor :title, :body, :slug, :date
   end
 end
 
