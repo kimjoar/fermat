@@ -1,9 +1,7 @@
 Fermat
 ======
 
-A dead simple [Sinatra](http://www.sinatrarb.com/) powered blog engine that parses [Markdown](http://daringfireball.net/projects/markdown/) formatted files.
-
-Fermat was developed to power [Kimjoar.net](http://kimjoar.net).
+Fermat is a dead simple, no-frills [Sinatra](http://www.sinatrarb.com/) powered blog engine. Does a blog engine need a database, editing functionality and commenting? Indeed not. Fermat parses [Markdown](http://daringfireball.net/projects/markdown/) formatted files, and that's about it. In includes rudimentary caching and RSS support, and is exceptionally simple to extend. Blogging doesn't get any simpler than this.
 
 Requirements
 ------------
@@ -28,12 +26,15 @@ Default tree structure
     `-- rss.builder
 </pre>
 
-All the files in the posts folder with suffix `.markdown` will be converted to HTML and cached in the cache folder.
+Posts
+-----
+
+There are some essentials to how posting is done in Fermat. Specifically the files must be named `yyyy-mm-dd-postname.markdown`, and the first line of the file must be the post title. An example of a Fermat supported filename is `2009-05-16-simple-fermat.markdown`.
 
 RSS
 ---
 
-Fermat now also includes a simple RSS feed for entries using [Builder](http://sinatra.rubyforge.org/api/classes/Sinatra/Builder.html). An example of the `rss.builder` file:
+Fermat includes a simple RSS feed for entries using [Builder](http://sinatra.rubyforge.org/api/classes/Sinatra/Builder.html). An example of the `rss.builder` file:
 
 <pre>
 xml.instruct! :xml, :version => '1.0'
