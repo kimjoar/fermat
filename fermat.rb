@@ -6,14 +6,24 @@ class Fermat
   attr_accessor :cache_path, :images_path, :posts_path, :posts_suffix, :cache_suffix
 
   def initialize
-    @path         = File.dirname(__FILE__)
-    @cache_path   = File.join(@path, "cache")
-    @images_path  = File.join(@path, "images")
-    @posts_path   = File.join(@path, "posts")
-    @posts_suffix = ".markdown"
-    @cache_suffix = ".html"
+    @path           = File.dirname(__FILE__)
+    @cache_path     = File.join(@path, "cache")
+    @images_path    = File.join(@path, "images")
+    @posts_path     = File.join(@path, "posts")
+    @plugins_path   = File.join(@path, "plugins")
+    @posts_suffix   = ".markdown"
+    @cache_suffix   = ".html"
+    @plugins_suffix = ".rb"
+
+    @posts_cache  = "posts.marshal"
 
     cache if cache?
+  end
+
+  def plugins
+    @plugins = Plugins.new(@plugins_path, @plugins_suffix) if @plugins == nil
+
+    @plugins
   end
 
   def post(name)
@@ -25,7 +35,7 @@ class Fermat
   end
 
   def posts
-    filename = File.join(@cache_path, "posts.marshal")
+    filename = File.join(@cache_path, @posts_cache)
     raise "Posts cache does not exist" unless File.file?(filename)
 
     File.open(filename) do |f|
@@ -57,7 +67,7 @@ class Fermat
       cached_posts[post.date.join("").to_i] = post
     end
 
-    f = File.new(File.join(@cache_path, "posts.marshal"), "w")
+    f = File.new(File.join(@cache_path, @posts_cache), "w")
     f.flock(File::LOCK_EX)
     f.write(Marshal.dump(cached_posts.sort.reverse.map {|a| a[1]}))
     f.flock(File::LOCK_UN)
@@ -84,11 +94,24 @@ class Fermat
   class Post
     attr_accessor :title, :body, :slug, :date
   end
+  
+  class Plugins
+    def initialize(path, suffix)
+      @plugins_path   = path
+      @plugins_suffix = suffix
+    end
+    
+    def get
+      Dir.glob(File.join(@plugins_path + "/**", "*" + @plugins_suffix))
+    end
+  end
 end
 
 configure do
   fermat = Fermat.new
   set :fermat, fermat
+  
+  @plugins = fermat.plugins.get
 end
 
 get '/' do
@@ -101,7 +124,7 @@ get '/post/:name' do
   erb :post
 end
 
-get '/rss' do
-  @posts = options.fermat.posts
-  builder :rss
+@plugins.each do |plugin|
+  set :views, File.dirname(plugin)
+  load plugin
 end
