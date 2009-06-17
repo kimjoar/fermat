@@ -34,9 +34,7 @@ Posts
 
 Posts are Markdown formatted, and must be named `yyyy-mm-dd-postname.markdown`. The first line of the file must be the post title. An example of a Fermat supported filename is `2009-05-16-simple-fermat.markdown`.
 
-Plugins
--------
+Need more functionality?
+------------------------
 
-Fermat includes a dead-simple plugin system. By adding .rb files (or directories with .rb files) in the `plugins` folder, they will automatically be loaded. Check out the RSS plugin for an example. 
-
-The view folder will automatically be set to the same folder as the included plugin.
+Fermat includes a plugin system. By adding .rb files (or directories with .rb files) in the `plugins` folder, they will automatically be loaded. Check out the RSS plugin for an example. If the plugin includes views, they must be included in the same folder as the plugin.
