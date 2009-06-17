@@ -14,8 +14,7 @@ class Fermat
     @posts_suffix   = ".markdown"
     @cache_suffix   = ".html"
     @plugins_suffix = ".rb"
-
-    @posts_cache  = "posts.marshal"
+    @posts_cache    = "posts.marshal"
 
     cache if cache?
   end
@@ -30,7 +29,7 @@ class Fermat
     raise "Name not valid" if name.include?("..")
     filename = File.join(@cache_path, name + @cache_suffix)
     raise "File does not exist" unless File.file?(filename) 
-    
+
     File.new(filename).read
   end
 
@@ -47,60 +46,76 @@ class Fermat
 
   private
 
+  def files(type=nil)
+    files = case type
+      when :cache then Dir.glob(File.join(@cache_path, "*" + @cache_suffix))
+      else Dir.glob(File.join(@posts_path, "*" + @posts_suffix))
+    end
+
+    files
+  end
+
   def cache?
     Dir.mkdir("cache") unless File.directory?("cache")
-    Dir.glob(File.join(@posts_path, "*" + @posts_suffix)).length != Dir.glob(File.join(@cache_path, "*" + @cache_suffix)).length
+    files(:post).length != files(:cache).length
   end
 
   def cache
-    files = Dir.glob(File.join(@posts_path, "*" + @posts_suffix))
-    cached_posts = {}
-    
-    files.each do |filename|
-      post = parse_file(filename)
-      f = File.new(File.join(@cache_path, post.slug + @cache_suffix), "w")
-      f.flock(File::LOCK_EX)
-      f.write(post.body)
-      f.flock(File::LOCK_UN)
-      f.close
+    posts = []
 
-      cached_posts[post.date.join("").to_i] = post
+    files.each do |filename|
+      posts << Post.new(filename, self)
     end
 
     f = File.new(File.join(@cache_path, @posts_cache), "w")
     f.flock(File::LOCK_EX)
-    f.write(Marshal.dump(cached_posts.sort.reverse.map {|a| a[1]}))
+    f.write(Marshal.dump(posts.sort {|x,y| y.date.join("") <=> x.date.join("")}))
     f.flock(File::LOCK_UN)
     f.close
   end
 
-  def parse_file(filename)
-    raise "File does not exist" unless File.file?(filename) 
-
-    post = Post.new
-    base = File.basename(filename, @posts_suffix).split("-", 4)
-    post.slug = base[3]
-    post.date = base[0..2]
-
-    File.open(filename) do |f|
-      post.title = f.readline
-      f.rewind
-      post.body = Maruku.new(f.read).to_html
-    end
-
-    post
-  end
-
   class Post
     attr_accessor :title, :body, :slug, :date
+
+    def initialize(filename=nil, fermat=nil)
+      @fermat = fermat
+      from_file(filename) unless filename == nil
+      cache if cache?
+    end
+
+    def from_file(filename)
+      raise "File does not exist" unless File.file?(filename)
+
+      base = File.basename(filename, @fermat.posts_suffix).split("-", 4)
+      self.slug = base[3]
+      self.date = base[0..2]
+
+      File.open(filename) do |f|
+        self.title = f.readline
+        f.rewind
+        self.body = Maruku.new(f.read).to_html
+      end
+    end
+
+    def cache
+      f = File.new(File.join(@fermat.cache_path, self.slug + @fermat.cache_suffix), "w")
+      f.flock(File::LOCK_EX)
+      f.write(self.body)
+      f.flock(File::LOCK_UN)
+      f.close
+    end
+
+    def cache?
+      not File.file?(File.join(@fermat.cache_path, self.date.join("-") + "-" + self.slug + @fermat.posts_suffix))
+    end
   end
-  
+
   class Plugins
     def initialize(path, suffix)
       @plugins_path   = path
       @plugins_suffix = suffix
     end
-    
+
     def get
       Dir.glob(File.join(@plugins_path + "/**", "*" + @plugins_suffix))
     end
@@ -110,16 +125,19 @@ end
 configure do
   fermat = Fermat.new
   set :fermat, fermat
-  
+
   @plugins = fermat.plugins.get
+  @views = File.join(File.dirname(__FILE__), "views")
 end
 
 get '/' do
+  set :views, @views
   @posts = options.fermat.posts
   erb :index
 end
 
 get '/post/:name' do
+  set :views, @views
   @post = options.fermat.post(params[:name])
   erb :post
 end
