@@ -20,7 +20,7 @@ class Fermat
   end
 
   def plugins
-    @plugins = Plugins.new(@plugins_path, @plugins_suffix) if @plugins == nil
+    @plugins = Dir.glob(File.join(@plugins_path + "/**", "*" + @plugins_suffix)) if @plugins == nil
 
     @plugins
   end
@@ -109,24 +109,13 @@ class Fermat
       not File.file?(File.join(@fermat.cache_path, self.date.join("-") + "-" + self.slug + @fermat.posts_suffix))
     end
   end
-
-  class Plugins
-    def initialize(path, suffix)
-      @plugins_path   = path
-      @plugins_suffix = suffix
-    end
-
-    def get
-      Dir.glob(File.join(@plugins_path + "/**", "*" + @plugins_suffix))
-    end
-  end
 end
 
 configure do
   fermat = Fermat.new
   set :fermat, fermat
 
-  @plugins = fermat.plugins.get
+  @plugins = fermat.plugins
   @views = File.join(File.dirname(__FILE__), "views")
 end
 
