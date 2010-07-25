@@ -1,7 +1,7 @@
 Fermat
 ======
 
-Fermat is a dead simple, no-frills [Sinatra](http://www.sinatrarb.com/) powered blog engine. Does a blog engine need a database, editing functionality and commenting? Indeed not. Fermat parses [Markdown](http://daringfireball.net/projects/markdown/) formatted files, and that's about it. In includes rudimentary caching  and is exceptionally simple to extend because of the plugin system. Blogging doesn't get any simpler than this.
+Fermat is a dead simple, no-frills [Sinatra](http://www.sinatrarb.com/) powered blog engine. Does a blog engine need a database, editing functionality and commenting? Indeed not. Fermat parses [Markdown](http://daringfireball.net/projects/markdown/) formatted files, and that's about it. In includes rudimentary caching and is exceptionally simple to extend because of the plugin system. Blogging doesn't get any simpler than this.
 
 Requirements
 ------------
